@@ -31,7 +31,7 @@ namespace Maze_Solver_API.Controllers
             });
 
             MazeResponse response = new(
-                Maze: createdMaze.GetMatrix(),
+                Maze: createdMaze.GetPresentationMaze(),
                 Width: createdMaze.Width,
                 Height:createdMaze.Height,
                 MazeId:createdMaze.Id);
@@ -45,11 +45,10 @@ namespace Maze_Solver_API.Controllers
         public IActionResult FindMinimumPath([FromBody] FindMinimalPathRequest request)
         {
             if (_memoryCache.Get(request.Id) is not Maze maze)
-                return BadRequest("Matrix not found.");
+                return BadRequest("Maze not found.");
 
             if (!IsValidCoordinate(request.StartingPosition, maze.Matrix) || !IsValidCoordinate(request.EndPosition, maze.Matrix))
-                return BadRequest("Invalid Cordinates  the maze");
-
+                return BadRequest("Invalid Cordinates in the maze");
 
             var pathResult = maze.FindShortestPath(request.StartingPosition, request.EndPosition);
 
@@ -63,9 +62,11 @@ namespace Maze_Solver_API.Controllers
 
         private static bool IsValidCoordinate(Coordinate coordinate, int[,] maze)
         {
-            return coordinate.X >= 0 && coordinate.X < maze.GetLength(0) &&
-                   coordinate.Y >= 0 && coordinate.Y < maze.GetLength(1) &&
-                   maze[coordinate.X, coordinate.Y] == 0;
+
+            return (coordinate.X >= 0 && coordinate.X < maze.GetLength(0)) 
+                && (coordinate.Y >= 0 && coordinate.Y < maze.GetLength(1)) 
+                && (maze[coordinate.X, coordinate.Y] != 0);
+
         }
     }
 }

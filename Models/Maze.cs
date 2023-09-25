@@ -34,7 +34,7 @@ public class Maze
         }
     }
 
-    public List<List<int>> GetMatrix()
+    public List<List<int>> GetPresentationMaze()
     {
         List<List<int>> matrixList = new();
 
@@ -56,63 +56,92 @@ public class Maze
         int rows = Matrix.GetLength(0);
         int cols = Matrix.GetLength(1);
 
+        int[] dx = { -1, 1, 0, 0 };
+        int[] dy = { 0, 0, -1, 1 };
+
         int[,] distance = new int[rows, cols];
-        Coordinate?[,] prev = new Coordinate?[rows, cols];
+        bool[,] visited = new bool[rows, cols];
 
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
             {
                 distance[i, j] = int.MaxValue;
-                prev[i, j] = null;
+                visited[i, j] = false;
             }
         }
 
         distance[start.X, start.Y] = 0;
-        Queue<Coordinate> queue = new Queue<Coordinate>();
-        queue.Enqueue(start);
 
-        while (queue.Count > 0)
+        while (true)
         {
-            var current = queue.Dequeue();
+            int minDistance = int.MaxValue;
+            Coordinate? minCoordinate = null;
 
-            int[] dx = { -1, 1, 0, 0 };
-            int[] dy = { 0, 0, -1, 1 };
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (!visited[i, j] && distance[i, j] < minDistance)
+                    {
+                        minDistance = distance[i, j];
+                        minCoordinate = new Coordinate(i, j);
+                    }
+                }
+            }
+
+            if (minCoordinate == null)
+                break;
+
+            visited[minCoordinate.X, minCoordinate.Y] = true;
 
             for (int i = 0; i < 4; i++)
             {
-                int newX = current.X + dx[i];
-                int newY = current.Y + dy[i];
+                int newX = minCoordinate.X + dx[i];
+                int newY = minCoordinate.Y + dy[i];
 
-                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && Matrix[newX, newY] == 0)
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols &&
+                    !visited[newX, newY] && Matrix[newX, newY] != 0)
                 {
-                    int newDist = distance[current.X, current.Y] + 1;
-                    if (newDist < distance[newX, newY])
+                    int newDistance = distance[minCoordinate.X, minCoordinate.Y] + Matrix[newX, newY];
+
+                    if (newDistance < distance[newX, newY])
                     {
-                        distance[newX, newY] = newDist;
-                        prev[newX, newY] = current;
-                        queue.Enqueue(new Coordinate(newX, newY));
+                        distance[newX, newY] = newDistance;
                     }
                 }
             }
         }
 
-        if (distance[end.X, end.Y] == int.MaxValue)
-        {
-            return new PathResult(new List<Coordinate>(), 0);
-        }
-
+        // Reconstruct the path from end to start
         List<Coordinate> path = new();
-        var currentPos = end;
+        Coordinate currentCoordinate = end;
 
-        while (currentPos != null)
+        while (currentCoordinate.X != start.X || currentCoordinate.Y != start.Y)
         {
-            path.Add(currentPos);
-            currentPos = prev[currentPos.X, currentPos.Y];
+            path.Add(currentCoordinate);
+
+            for (int i = 0; i < 4; i++)
+            {
+                int newX = currentCoordinate.X + dx[i];
+                int newY = currentCoordinate.Y + dy[i];
+
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols &&
+                    distance[newX, newY] + Matrix[currentCoordinate.X, currentCoordinate.Y] == distance[currentCoordinate.X, currentCoordinate.Y])
+                {
+                    currentCoordinate = new Coordinate(newX, newY);
+                    break;
+                }
+            }
         }
+
+        path.Add(start);
         path.Reverse();
 
-        return new PathResult(path, distance[end.X, end.Y]);
+        // Calculate the total cost
+        int cost = distance[end.X, end.Y];
+
+        return new PathResult(path, cost);
     }
 
 }
