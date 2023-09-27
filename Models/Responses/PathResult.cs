@@ -2,5 +2,5 @@
 
 namespace MazeSolver.API.Models.Responses
 {
-    public record PathResult(List<Coordinate> MinimalPath, int Cost);
+    public record PathResult(List<List<int>> MinimalPath , int Cost);
 }
