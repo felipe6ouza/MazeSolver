@@ -7,17 +7,13 @@ builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MazeSolver.API");
+    c.RoutePrefix = string.Empty; 
+});
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
