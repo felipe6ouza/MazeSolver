@@ -23,13 +23,19 @@ public class Maze
 
     public void GenerateMaze()
     {
+
         Random random = new();
-        for (int row = 0; row < Height; row++)
+        var numberOfVertices = Width;
+
+        for (int i = 0; i < numberOfVertices; i++)
         {
-            for (int col = 0; col < Width; col++)
+            for (int j = i + 1; j < numberOfVertices; j++)
             {
                 double obstacleChance = random.NextDouble();
-                Matrix[row, col] = (obstacleChance <= ObstacleDensity) ? 0 : random.Next(4);
+               
+                int weight = obstacleChance <= ObstacleDensity ? -1 : random.Next(1, 4); 
+                Matrix[i, j] = weight;
+                Matrix[j, i] = weight;
             }
         }
     }
