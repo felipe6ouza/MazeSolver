@@ -9,7 +9,7 @@ public class GenerateMapRequest
     public int Size { get; set; }
 
     [Required(ErrorMessage = "The parameter ObstacleDensity is required.")]
-    [Range(0, 1, ErrorMessage = "The field ObstacleDensity must be between 0 and 1.")]
+    [Range(0, 0.9, ErrorMessage = "The field ObstacleDensity must be between 0 and 0.9")]
     [JsonPropertyName("obstacleDensity")]
     public double ObstacleDensity { get; set; }
 }
